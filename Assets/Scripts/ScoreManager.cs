@@ -54,8 +54,12 @@ public class ScoreManager : MonoBehaviourPunCallbacks
     public override void OnPlayerPropertiesUpdate(Photon.Realtime.Player player, Hashtable changedProps)
     {
         if (!changedProps.ContainsKey("score")) return;
-        int newScore = (int)changedProps["score"];
-        UpdateScoreUI(newScore);
+
+        if (player.IsLocal)
+        {
+            int newScore = (int)changedProps["score"];
+            UpdateScoreUI(newScore);
+        }
     }
 
     private void UpdateScoreUI(int score)

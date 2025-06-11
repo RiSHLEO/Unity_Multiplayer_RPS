@@ -10,6 +10,7 @@ public class Player : MonoBehaviourPunCallbacks
     [SerializeField] private GameObject bladeModel;
 
     private ScoreManager _scoreManager;
+    private ExpManager _expManager;
 
     public FormType CurrentForm;
 
@@ -30,6 +31,7 @@ public class Player : MonoBehaviourPunCallbacks
     private void Awake()
     {
         _scoreManager = ScoreManager.Instance;
+        _expManager = ExpManager.Instance;
 
         rb = GetComponent<Rigidbody>();
         inputSet = new PlayerInputSet();
@@ -99,7 +101,10 @@ public class Player : MonoBehaviourPunCallbacks
         if (Beats(CurrentForm, other.CurrentForm) && !other.photonView.IsMine)
         {
             _scoreManager.AddScoreToLocalPlayer(1);
+            _expManager.AddEnergy(20);
             MutateOtherPlayer(other);
+            
+            other.photonView.RPC(nameof(LoseEnergy), other.photonView.Owner, 10);
         }
     }
 
@@ -128,7 +133,12 @@ public class Player : MonoBehaviourPunCallbacks
     private void SetNickname(string _name)
     {
         nickName = _name;
-        
         nickNameText.text = nickName;
+    }
+    
+    [PunRPC]
+    private void LoseEnergy(int amount)
+    {
+        _expManager.SpendEnergy(amount);
     }
 }

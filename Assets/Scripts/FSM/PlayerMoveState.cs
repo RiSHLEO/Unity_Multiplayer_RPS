@@ -12,6 +12,34 @@ public class PlayerMoveState : PlayerState
     {
         base.Update();
 
+        AssignSpeed();
+
+        ChangeToAbilityState();
+    }
+
+    private void ChangeToAbilityState()
+    {
+        if (player.currentAbility.ShouldActivate())
+        {
+            //if(player.CurrentForm == FormType.Stone)
+            //{
+            //    stateMachine.ChangeState(player.sheildState);
+            //}
+
+            //if (player.CurrentForm == FormType.Veil)
+            //{
+            //    stateMachine.ChangeState(player.invisState);
+            //}
+
+            if (player.CurrentForm == FormType.Blade)
+            {
+                stateMachine.ChangeState(player.dashState);
+            }
+        }
+    }
+
+    private void AssignSpeed()
+    {
         if (player.moveInput.x == 0 && player.moveInput.y == 0)
         {
             stateMachine.ChangeState(player.idleState);
@@ -27,11 +55,11 @@ public class PlayerMoveState : PlayerState
         float currentSpeed;
 
         if (currentForm == FormType.Stone)
-            currentSpeed = 20f;
+            currentSpeed = 6f;
         else if (currentForm == FormType.Veil)
-            currentSpeed = 8f;
+            currentSpeed = 10f;
         else if (currentForm == FormType.Blade)
-            currentSpeed = 12f;
+            currentSpeed = 15f;
         else
             currentSpeed = player.moveSpeed;
 

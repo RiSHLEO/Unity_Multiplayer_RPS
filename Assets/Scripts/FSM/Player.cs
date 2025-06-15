@@ -20,6 +20,7 @@ public class Player : MonoBehaviourPunCallbacks
     private PlayerStateMachine stateMachine;
     public PlayerIdleState idleState {  get; private set; }
     public PlayerMoveState moveState {  get; private set; }
+    public PlayerDashState dashState {  get; private set; }
 
     public Vector2 moveInput { get; private set; }
 
@@ -27,6 +28,8 @@ public class Player : MonoBehaviourPunCallbacks
 
     public string nickName;
     public TextMeshPro nickNameText;
+    
+    public IFormAbility currentAbility {  get; private set; }
 
     private void Awake()
     {
@@ -38,6 +41,9 @@ public class Player : MonoBehaviourPunCallbacks
         stateMachine = new PlayerStateMachine();
         idleState = new PlayerIdleState(this, stateMachine, "idle");
         moveState = new PlayerMoveState(this, stateMachine, "move");
+        dashState = new PlayerDashState(this, stateMachine, "dash");
+
+        Debug.developerConsoleVisible = true;
     }
 
     private void OnEnable()
@@ -65,6 +71,9 @@ public class Player : MonoBehaviourPunCallbacks
     {  
         if(photonView.IsMine)
             stateMachine.UpdateActiveState();
+
+        if(photonView.IsMine && Input.GetKeyDown(KeyCode.Space))
+            currentAbility.UseFormAbility(this);
     }
 
     public void SetVelocity(float xVelocity, float zVelocity)
@@ -82,6 +91,8 @@ public class Player : MonoBehaviourPunCallbacks
 
     private void UpdateModel()
     {
+        AssignAbility();
+
         stoneModel.SetActive(CurrentForm == FormType.Stone);
         bladeModel.SetActive(CurrentForm == FormType.Blade);
         veilModel.SetActive(CurrentForm == FormType.Veil);
@@ -127,6 +138,25 @@ public class Player : MonoBehaviourPunCallbacks
     {
         CurrentForm = (FormType)newForm;
         UpdateModel();
+        AssignAbility();
+    }
+
+    private void AssignAbility()
+    {
+        switch (CurrentForm)
+        {
+            case FormType.Stone:
+                currentAbility = new StoneSheildAbility();
+                break;
+            
+            case FormType.Veil:
+                currentAbility = new VeilInvisAbility();
+                break;
+            
+            case FormType.Blade:
+                currentAbility = new BladeDashAbility();
+                break;
+        }
     }
 
     [PunRPC]
